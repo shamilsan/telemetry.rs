@@ -1,0 +1,54 @@
+name: Collator
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    tags: ['*']
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  prepare:
+    name: Get version
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - id: version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+      - name: Show version
+        run: echo ${{ steps.version.outputs.VERSION }}
+
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: actions/checkout@v3
+        with:
+          repository: paritytech/substrate-telemetry
+
+      - name: Checkout ${{ needs.prepare.outputs.version }}
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/checkout@v3
+        with:
+          repository: paritytech/substrate-telemetry
+          ref: ${{ needs.prepare.outputs.version }}
+
+      - name: Build backend
+        run: cd backend && cargo b -r
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: yarn
+
+      - name: Build frontend
+        run: cd frontend && yarn install && yarn build
