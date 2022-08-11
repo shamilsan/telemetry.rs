@@ -1,4 +1,4 @@
-name: Collator
+name: Build
 
 on:
   pull_request:
@@ -41,6 +41,9 @@ jobs:
           repository: paritytech/substrate-telemetry
           ref: ${{ needs.prepare.outputs.version }}
 
+      - name: Cache
+        uses: Swatinem/rust-cache@v1
+
       - name: Build backend
         run: cd backend && cargo b -r
 
@@ -49,6 +52,7 @@ jobs:
         with:
           node-version: 18
           cache: yarn
+          cache-dependency-path: 'frontend/yarn.lock'
 
       - name: Build frontend
         run: cd frontend && yarn install && yarn build
