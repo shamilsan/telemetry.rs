@@ -41,16 +41,16 @@ jobs:
           repository: paritytech/substrate-telemetry
           ref: ${{ needs.prepare.outputs.version }}
 
-      - name: Cache
-        uses: Swatinem/rust-cache@v1
+      # - name: Cache
+      #   uses: Swatinem/rust-cache@v1
 
-      - name: Build backend
-        run: cd backend && cargo b -r
+      # - name: Build backend
+      #   run: cd backend && cargo b -r
 
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 16
           cache: yarn
           cache-dependency-path: 'frontend/yarn.lock'
 
