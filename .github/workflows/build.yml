@@ -26,6 +26,7 @@ jobs:
       version: ${{ steps.version.outputs.VERSION }}
 
   build:
+    name: Build backend and frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout master
@@ -41,11 +42,11 @@ jobs:
           repository: paritytech/substrate-telemetry
           ref: ${{ needs.prepare.outputs.version }}
 
-      # - name: Cache
-      #   uses: Swatinem/rust-cache@v1
+      - name: Cache
+        uses: Swatinem/rust-cache@v1
 
-      # - name: Build backend
-      #   run: cd backend && cargo b -r
+      - name: Build backend
+        run: cd backend && cargo b -r
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -55,4 +56,24 @@ jobs:
           cache-dependency-path: 'frontend/yarn.lock'
 
       - name: Build frontend
-        run: cd frontend && yarn install && yarn build
+        run: |
+          cd frontend
+          yarn install
+          yarn build
+          mv -vf build html
+          XZ_OPT=-9 tar --sort='name' -cvJf frontend-html.tar.xz html
+
+      - name: Prepare artifacts
+        run: |
+          mkdir -p artifact
+          cp -fv backend/target/release/telemetry_core artifact/
+          cp -fv backend/target/release/telemetry_shard artifact/
+          cp -fv frontend/frontend-html.tar.xz artifact/
+          cd artifact
+          strip telemetry_core || true
+          strip telemetry_shard || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: artifact
