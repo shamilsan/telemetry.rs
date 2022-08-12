@@ -1,0 +1,81 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+env:
+  CARGO_TERM_COLOR: always
+  TAG: v9.0-5bff41d
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: paritytech/substrate-telemetry
+          ref: ${{ env.TAG }}
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v1
+
+      - name: Build backend
+        run: cd backend && cargo b -r
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: yarn
+          cache-dependency-path: 'frontend/yarn.lock'
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          yarn install
+          yarn build
+          mv -vf build html
+          XZ_OPT=-9 tar --sort='name' -cvJf frontend-html.tar.xz html
+
+      - name: Prepare artifacts
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          mkdir -p artifact
+          cp -fv backend/target/release/telemetry_core artifact/
+          cp -fv backend/target/release/telemetry_shard artifact/
+          cp -fv frontend/frontend-html.tar.xz artifact/
+          cd artifact
+          strip telemetry_core || true
+          strip telemetry_shard || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: artifact
+
+  upload:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
+    needs: build
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Delete previous release
+        uses: dev-drprasad/delete-tag-and-release@v0.1.3
+        with:
+          delete_release: true
+          tag_name: ${{ env.TAG }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.TAG }}
+          files: artifact/*
