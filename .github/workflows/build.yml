@@ -32,16 +32,8 @@ jobs:
           cache: yarn
           cache-dependency-path: 'frontend/yarn.lock'
 
-      - name: Build frontend
-        run: |
-          cd frontend
-          yarn install
-          yarn build
-          mv -vf build html
-          XZ_OPT=-9 tar --sort='name' -cvJf frontend-html.tar.xz html
-
       - name: Prepare artifacts
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           mkdir -p artifact
           cp -fv backend/target/release/telemetry_core artifact/
@@ -51,6 +43,7 @@ jobs:
           strip telemetry_shard || true
 
       - name: Upload artifacts
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v3
         with:
           path: artifact
@@ -80,12 +73,13 @@ jobs:
           XZ_OPT=-9 tar --sort='name' -cvJf frontend-html.tar.xz html
 
       - name: Prepare artifacts
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           mkdir -p artifact
           cp -fv frontend/frontend-html.tar.xz artifact/
 
       - name: Upload artifacts
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v3
         with:
           path: artifact
