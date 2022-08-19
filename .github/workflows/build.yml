@@ -3,15 +3,14 @@ name: Build
 on:
   pull_request:
     branches: [master]
-  push:
-    branches: [master]
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
   TAG: v9.0-5bff41d
 
 jobs:
-  build:
+  build-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,6 +32,38 @@ jobs:
           cache: yarn
           cache-dependency-path: 'frontend/yarn.lock'
 
+      - name: Prepare artifacts
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          mkdir -p artifact
+          cp -fv backend/target/release/telemetry_core artifact/
+          cp -fv backend/target/release/telemetry_shard artifact/
+          cd artifact
+          strip telemetry_core || true
+          strip telemetry_shard || true
+
+      - name: Upload artifacts
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v3
+        with:
+          path: artifact
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: paritytech/substrate-telemetry
+          ref: ${{ env.TAG }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: yarn
+          cache-dependency-path: 'frontend/yarn.lock'
+
       - name: Build frontend
         run: |
           cd frontend
@@ -42,25 +73,21 @@ jobs:
           XZ_OPT=-9 tar --sort='name' -cvJf frontend-html.tar.xz html
 
       - name: Prepare artifacts
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           mkdir -p artifact
-          cp -fv backend/target/release/telemetry_core artifact/
-          cp -fv backend/target/release/telemetry_shard artifact/
           cp -fv frontend/frontend-html.tar.xz artifact/
-          cd artifact
-          strip telemetry_core || true
-          strip telemetry_shard || true
 
       - name: Upload artifacts
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v3
         with:
           path: artifact
 
   upload:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' }}
-    needs: build
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: [build-backend, build-frontend]
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
