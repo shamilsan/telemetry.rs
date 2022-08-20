@@ -1,5 +1,8 @@
 # telemetry.rs
 
+[![Deploy][deploy_badge]][build_href]
+[deploy_badge]: https://github.com/shamilsan/telemetry.rs/workflows/Deploy/badge.svg
+
 Telemetry site for Substrate-based blockchains. Source code: https://github.com/paritytech/substrate-telemetry
 
 📺 https://telemetry.rs

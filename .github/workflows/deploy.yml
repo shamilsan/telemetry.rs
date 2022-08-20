@@ -1,4 +1,4 @@
-name: Build
+name: Deploy
 
 on:
   pull_request:
@@ -20,20 +20,26 @@ jobs:
           ref: ${{ env.TAG }}
 
       - name: Cache
-        uses: Swatinem/rust-cache@v1
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            backend -> target
 
       - name: Build backend
-        run: make backend
+        run: cd backend && cargo b -r
 
       - name: Prepare artifacts
         if: ${{ github.event_name != 'pull_request' }}
         run: |
+          mkdir -p artifact
+          cp -fv backend/target/release/telemetry_core artifact/
+          cp -fv backend/target/release/telemetry_shard artifact/
           cd artifact
           strip telemetry_core || true
           strip telemetry_shard || true
 
       - name: Upload artifacts
-        # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v3
         with:
           path: artifact
@@ -55,7 +61,16 @@ jobs:
           cache-dependency-path: 'frontend/yarn.lock'
 
       - name: Build frontend
-        run: make frontend
+        run: |
+          cd frontend && yarn && yarn build
+          mv -vf build html
+          tar -cvJf frontend-html.tar.xz html
+
+      - name: Prepare artifacts
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          mkdir -p artifact
+          cp -fv frontend/frontend-html.tar.xz artifact/
 
       - name: Upload artifacts
         if: ${{ github.event_name != 'pull_request' }}
@@ -65,11 +80,19 @@ jobs:
 
   upload:
     runs-on: ubuntu-latest
-    # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
+    if: ${{ github.event_name != 'pull_request' }}
     needs: [build-backend, build-frontend]
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Download artifacts
         uses: actions/download-artifact@v2
+
+      - name: List artifacts
+        run: |
+          pwd
+          ls -la artifact
 
       - name: Deploy
         uses: dawidd6/action-ansible-playbook@v2
