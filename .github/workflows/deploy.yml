@@ -23,11 +23,14 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Build backend
-        run: make backend
+        run: cd backend && cargo b -r
 
       - name: Prepare artifacts
         if: ${{ github.event_name != 'pull_request' }}
         run: |
+          mkdir -p artifact
+          cp -fv backend/target/release/telemetry_core artifact/
+          cp -fv backend/target/release/telemetry_shard artifact/
           cd artifact
           strip telemetry_core || true
           strip telemetry_shard || true
@@ -55,10 +58,19 @@ jobs:
           cache-dependency-path: 'frontend/yarn.lock'
 
       - name: Build frontend
-        run: make frontend
+        run: |
+          cd frontend && yarn && yarn build
+          mv -vf build html
+          tar -cvJf frontend-html.tar.xz html
+
+      - name: Prepare artifacts
+        # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
+        run: |
+          mkdir -p artifact
+          cp -fv frontend/frontend-html.tar.xz artifact/
 
       - name: Upload artifacts
-        if: ${{ github.event_name != 'pull_request' }}
+        # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
         uses: actions/upload-artifact@v3
         with:
           path: artifact
