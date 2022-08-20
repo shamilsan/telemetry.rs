@@ -29,7 +29,7 @@ jobs:
         run: cd backend && cargo b -r
 
       - name: Prepare artifacts
-        # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           mkdir -p artifact
           cp -fv backend/target/release/telemetry_core artifact/
@@ -39,7 +39,7 @@ jobs:
           strip telemetry_shard || true
 
       - name: Upload artifacts
-        # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v3
         with:
           path: artifact
@@ -67,20 +67,20 @@ jobs:
           tar -cvJf frontend-html.tar.xz html
 
       - name: Prepare artifacts
-        # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           mkdir -p artifact
           cp -fv frontend/frontend-html.tar.xz artifact/
 
       - name: Upload artifacts
-        # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v3
         with:
           path: artifact
 
   upload:
     runs-on: ubuntu-latest
-    # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
+    if: ${{ github.event_name != 'pull_request' }}
     needs: [build-backend, build-frontend]
     steps:
       - name: Checkout
