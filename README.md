@@ -1,15 +1,19 @@
 # telemetry.rs
 
-[![Deploy][deploy_badge]][build_href]
-[deploy_badge]: https://github.com/shamilsan/telemetry.rs/workflows/Deploy/badge.svg
+[![Deploy][deploy_badge]][deploy_href]
 
-Telemetry site for Substrate-based blockchains. Source code: https://github.com/paritytech/substrate-telemetry
+[deploy_badge]: https://github.com/shamilsan/telemetry.rs/workflows/Deploy/badge.svg
+[deploy_href]: https://github.com/shamilsan/telemetry.rs/actions/workflows/deploy.yml
+
+Telemetry site for Substrate-based blockchains.
+
+Source code: https://github.com/paritytech/substrate-telemetry
 
 📺 https://telemetry.rs
 
 ## Usage
 
-1. Run your node with `--telemetry-url "wss://telemetry.rs/submit 0"` parameter. For example when running [Gear node](https://github.com/gear-tech/gear):
+1. Run your node with `--telemetry-url "wss://telemetry.rs/submit 0"` parameter. For example when running the [Gear node](https://github.com/gear-tech/gear):
 
     ```
     gear-node --name "node-in-telemetry" --telemetry-url "wss://telemetry.rs/submit 0"
@@ -22,8 +26,9 @@ Telemetry site for Substrate-based blockchains. Source code: https://github.com/
 ### Prerequisites
 
 - Rust
+- Node.js
 - Yarn
-- Ansible
+- (optional) Ansible
 
 ### Commands
 
