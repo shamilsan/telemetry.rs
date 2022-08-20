@@ -1,12 +1,12 @@
 [Unit]
-Description=Telemetry backend {{ item }}
+Description=Telemetry backend {{ item.name }}
 After=network.target
 
 [Service]
 Type=simple
 User={{ user }}
 Group={{ user }}
-ExecStart=/usr/local/bin/telemetry_{{ item }}
+ExecStart=/usr/local/bin/telemetry_{{ item.name }} {{ item.args }}
 Restart=always
 RestartSec=3
 

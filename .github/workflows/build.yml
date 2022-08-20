@@ -7,7 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  TAG: v9.0-5bff41d
+  TAG: v10.0-09b44ad
 
 jobs:
   build-backend:
@@ -23,27 +23,17 @@ jobs:
         uses: Swatinem/rust-cache@v1
 
       - name: Build backend
-        run: cd backend && cargo b -r
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: yarn
-          cache-dependency-path: 'frontend/yarn.lock'
+        run: make backend
 
       - name: Prepare artifacts
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          mkdir -p artifact
-          cp -fv backend/target/release/telemetry_core artifact/
-          cp -fv backend/target/release/telemetry_shard artifact/
           cd artifact
           strip telemetry_core || true
           strip telemetry_shard || true
 
       - name: Upload artifacts
-        if: ${{ github.event_name != 'pull_request' }}
+        # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
         uses: actions/upload-artifact@v3
         with:
           path: artifact
@@ -65,18 +55,7 @@ jobs:
           cache-dependency-path: 'frontend/yarn.lock'
 
       - name: Build frontend
-        run: |
-          cd frontend
-          yarn install
-          yarn build
-          mv -vf build html
-          XZ_OPT=-9 tar --sort='name' -cvJf frontend-html.tar.xz html
-
-      - name: Prepare artifacts
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          mkdir -p artifact
-          cp -fv frontend/frontend-html.tar.xz artifact/
+        run: make frontend
 
       - name: Upload artifacts
         if: ${{ github.event_name != 'pull_request' }}
@@ -86,23 +65,17 @@ jobs:
 
   upload:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' }}
+    # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
     needs: [build-backend, build-frontend]
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
 
-      - name: Delete previous release
-        uses: dev-drprasad/delete-tag-and-release@v0.1.3
+      - name: Deploy
+        uses: dawidd6/action-ansible-playbook@v2
         with:
-          delete_release: true
-          tag_name: ${{ env.TAG }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload
-        uses: softprops/action-gh-release@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: ${{ env.TAG }}
-          files: artifact/*
+          directory: ansible
+          playbook: install.yml
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          options: -u ubuntu
+          inventory: telemetry.rs

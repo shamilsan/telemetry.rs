@@ -7,6 +7,11 @@
   vars:
     user: telemetry
     email: cert@telemetry.rs
+    parts:
+      - name: core
+        args: --max-third-party-nodes 10000
+      - name: shard
+        args:
 
   tasks:
     - name: Enable firewall
@@ -50,17 +55,17 @@
 
     - name: Stop services
       become: yes
-      loop: [core, shard]
+      loop: '{{ parts }}'
       ignore_errors: yes
       systemd:
-        name: telemetry-{{ item }}
+        name: telemetry-{{ item.name }}
         state: stopped
 
     - name: Copy executables
       become: yes
-      loop: [core, shard]
-      get_url: # TODO: Replace by `copy` later
-        url: https://github.com/shamilsan/telemetry.rs/releases/download/v9.0-5bff41d/telemetry_{{ item }}
+      loop: '{{ parts }}'
+      copy:
+        src: ../artifact/telemetry_{{ item.name }}
         dest: /usr/local/bin
         mode: '0755'
         force: yes
@@ -69,18 +74,18 @@
 
     - name: Copy SystemD configs
       become: yes
-      loop: [core, shard]
+      loop: '{{ parts }}'
       template:
         src: telemetry.service.j2
-        dest: /etc/systemd/system/telemetry-{{ item }}.service
+        dest: /etc/systemd/system/telemetry-{{ item.name }}.service
         owner: root
         group: root
 
     - name: Start services
       become: yes
-      loop: [core, shard]
+      loop: '{{ parts }}'
       systemd:
-        name: telemetry-{{ item }}
+        name: telemetry-{{ item.name }}
         state: started
         enabled: yes
         daemon_reload: yes
@@ -110,9 +115,8 @@
     - name: Copy frontend
       become: yes
       unarchive:
-        src: https://github.com/shamilsan/telemetry.rs/releases/download/v9.0-5bff41d/frontend-html.tar.xz
+        src: ../artifact/frontend-html.tar.xz
         dest: /var/www/{{ inventory_hostname }}
-        remote_src: yes
         owner: www-data
         group: www-data
 
