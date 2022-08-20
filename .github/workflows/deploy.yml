@@ -20,7 +20,10 @@ jobs:
           ref: ${{ env.TAG }}
 
       - name: Cache
-        uses: Swatinem/rust-cache@v1
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            backend -> target
 
       - name: Build backend
         run: cd backend && cargo b -r
@@ -85,6 +88,11 @@ jobs:
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
+
+      - name: List artifacts
+        run: |
+          pwd
+          ls -la artifact
 
       - name: Deploy
         uses: dawidd6/action-ansible-playbook@v2
