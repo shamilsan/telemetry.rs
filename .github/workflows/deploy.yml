@@ -29,7 +29,7 @@ jobs:
         run: cd backend && cargo b -r
 
       - name: Prepare artifacts
-        if: ${{ github.event_name != 'pull_request' }}
+        # if: ${{ github.event_name != 'pull_request' }} # FIXME: Uncomment
         run: |
           mkdir -p artifact
           cp -fv backend/target/release/telemetry_core artifact/
