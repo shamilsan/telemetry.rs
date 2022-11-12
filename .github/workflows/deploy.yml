@@ -49,20 +49,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           repository: paritytech/substrate-telemetry
           ref: ${{ env.TAG }}
+          path: substrate-telemetry
+
+      - name: Update source files
+        run: |
+          cp -rvf frontend/* substrate-telemetry/frontend
+	        find substrate-telemetry/frontend/src -name "*.css" -type f -exec sed -ie 's/#e6007a/#00a87a/g' {} \;
 
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: yarn
-          cache-dependency-path: 'frontend/yarn.lock'
+          cache-dependency-path: 'substrate-telemetry/frontend/yarn.lock'
 
       - name: Build frontend
         run: |
-          cd frontend && yarn && yarn build
+          cd substrate-telemetry/frontend && yarn && yarn build
           mv -vf build html
           tar -cvJf frontend-html.tar.xz html
 
@@ -70,7 +79,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           mkdir -p artifact
-          cp -fv frontend/frontend-html.tar.xz artifact/
+          cp -fv substrate-telemetry/frontend/frontend-html.tar.xz artifact/
 
       - name: Upload artifacts
         if: ${{ github.event_name != 'pull_request' }}
