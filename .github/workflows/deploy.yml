@@ -60,7 +60,7 @@ jobs:
       - name: Update source files
         run: |
           cp -rvf frontend/* substrate-telemetry/frontend
-	        find substrate-telemetry/frontend/src -name "*.css" -type f -exec sed -ie 's/#e6007a/#00a87a/g' {} \;
+          find substrate-telemetry/frontend/src -name "*.css" -type f -exec sed -ie 's/#e6007a/#00a87a/g' {} \;
 
       - name: Install Node.js
         uses: actions/setup-node@v3
