@@ -17,6 +17,8 @@ checkout:
 		cd substrate-telemetry; \
 		git reset --hard && git pull; \
 	fi
+	@cp -rvf frontend/* substrate-telemetry/frontend
+	@find substrate-telemetry/frontend/src -name "*.css" -type f -exec sed -ie 's/#e6007a/#00a87a/g' {} \;
 
 clean:
 	@echo ──────────── Clean up ─────────────────────────

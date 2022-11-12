@@ -17,3 +17,6 @@ artifact/
 
 # Ansible temp files
 .ansible_*
+
+# Misc
+.DS_Store
