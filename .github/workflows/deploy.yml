@@ -76,7 +76,6 @@ jobs:
           tar -cvJf frontend-html.tar.xz html
 
       - name: Prepare artifacts
-        if: ${{ github.event_name != 'pull_request' }}
         run: |
           mkdir -p artifact
           cp -fv substrate-telemetry/frontend/frontend-html.tar.xz artifact/
