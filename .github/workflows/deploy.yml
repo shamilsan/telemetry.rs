@@ -7,7 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  TAG: v10.0-09b44ad
+  TAG: v11.0-f36353f
 
 jobs:
   build-backend:
@@ -29,7 +29,6 @@ jobs:
         run: cd backend && cargo b -r
 
       - name: Prepare artifacts
-        if: ${{ github.event_name != 'pull_request' }}
         run: |
           mkdir -p artifact
           cp -fv backend/target/release/telemetry_core artifact/
