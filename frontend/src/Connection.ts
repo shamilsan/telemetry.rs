@@ -71,7 +71,7 @@ export class Connection {
   }
 
   private static getBlacklist(): string[] {
-    const ENV_BLACKLIST = 'BLACKLIST  ';
+    const ENV_BLACKLIST = 'BLACKLIST';
 
     // If env_config.js is generated and loaded in, it'll set this variable.
     // This is set up in the Dockerfile. Otherwise, we just connect to a
@@ -81,14 +81,8 @@ export class Connection {
     }
 
     return [
-      '0x6cf0c78d265512c4f4e7d8c046ef25795f163fe476a838b64e7dbf2cdc164593',
-      '0xca57341aa3262edc34d8f4fc0c557309ff0941a24c271ffe9c1370ce627d723a',
-      '0xd144f24baf0b991be22ea8dc7dd4540d9d1e971e6bf17b1770b9fc9c88272484',
-      '0x209bc5d3262cad676cd1fcd87a958a3d00c0176f8720231cbbb54a10f735d9bb',
-      '0x6f022bd353c56b3e441507e1173601fd9dc0fb7547e6a95bbaf9b21f311bcab6',
-      '0x990aa19cec6cde20aab79d798feb4b233a414a5a197483aa44c68c543f1b5806',
-      '0x70f04c10c85b57482a63514576e6fab6b0df4ddcfbfdf1da8f03dc3f59ba5439',
-      // '0x92ed36f0a4a26169cba7c6990d51055c76b6b89de268568615a041eebb619a0e',
+      '0xe95743738788fb980fc5cfdaded9160d1e9eed707f7f6e19a591fd282cb29a69',
+      '0x8cf33640b92b0dbd0467dd839340a19a6f46d85d5f10f851eb3a3f712fdc1a8a'
     ];
   }
 
@@ -284,7 +278,7 @@ export class Connection {
             id,
             (node) => node.updateFinalized(height, hash),
             sortByColumn === FinalizedBlockColumn ||
-              sortByColumn === FinalizedHashColumn
+            sortByColumn === FinalizedHashColumn
           );
 
           break;
