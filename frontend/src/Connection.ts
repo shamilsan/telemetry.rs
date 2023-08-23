@@ -70,19 +70,18 @@ export class Connection {
     return 'ws://127.0.0.1:8000/feed';
   }
 
-  private static getBlacklist(): string[] {
-    const ENV_BLACKLIST = 'BLACKLIST';
+  private static getWhitelist(): string[] {
+    const ENV_WHITHEEL_LIST = 'WITHELIST';
 
     // If env_config.js is generated and loaded in, it'll set this variable.
     // This is set up in the Dockerfile. Otherwise, we just connect to a
     // default URL.
-    if (window.process_env?.[ENV_BLACKLIST]) {
-      return window.process_env[ENV_BLACKLIST] as string[];
+    if (window.process_env?.[ENV_WHITHEEL_LIST]) {
+      return window.process_env[ENV_WHITHEEL_LIST] as string[];
     }
 
     return [
-      '0xe95743738788fb980fc5cfdaded9160d1e9eed707f7f6e19a591fd282cb29a69',
-      '0x8cf33640b92b0dbd0467dd839340a19a6f46d85d5f10f851eb3a3f712fdc1a8a'
+      '0xfe1b4c55fd4d668101126434206571a7838a8b6b93a6d1b95d607e78e6c53763'
     ];
   }
 
@@ -335,7 +334,7 @@ export class Connection {
           if (chain) {
             chain.nodeCount = nodeCount;
           } else {
-            if (!Connection.getBlacklist().includes(genesisHash)) {
+            if (Connection.getWhitelist().includes(genesisHash)) {
               chains.set(genesisHash, { label, genesisHash, nodeCount });
             }
           }
