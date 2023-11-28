@@ -81,7 +81,10 @@ export class Connection {
     }
 
     return [
-      '0xfe1b4c55fd4d668101126434206571a7838a8b6b93a6d1b95d607e78e6c53763'
+      '0xfe1b4c55fd4d668101126434206571a7838a8b6b93a6d1b95d607e78e6c53763', // Vara Network
+      '0x525639f713f397dcf839bd022cd821f367ebcf179de7b9253531f8adbe5436d6', // Vara Network Testnet
+      '0x0305133fadfabb97be82d04e7ab12165b3fa177fd7302e43e6e2cc82081c274d', // Vara Local Testnet
+      '0x4428a3649036efe9745b67c0214bc829b00036bac074c75cf2700e749e570b94'  // Development
     ];
   }
 
