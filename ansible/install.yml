@@ -138,24 +138,3 @@
       service:
         name: nginx
         state: reloaded
-
-    - name: Install a certificate
-      become: yes
-      command: >
-        certbot --nginx
-        -d {{ inventory_hostname }}
-        -m {{ email }}
-        --agree-tos --noninteractive --redirect
-
-    - name: Reload Nginx again
-      become: yes
-      service:
-        name: nginx
-        state: reloaded
-
-    - name: Set cron job for auto renewal
-      become: yes
-      cron:
-        name: Renew letsencrypt
-        special_time: monthly
-        job: /usr/bin/certbot renew
