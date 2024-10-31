@@ -7,7 +7,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  TAG: v12.0-b25f3fb
+  TAG: master
 
 jobs:
   build-backend:
